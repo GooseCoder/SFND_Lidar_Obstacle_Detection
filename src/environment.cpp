@@ -75,12 +75,12 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
   pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud = pointCloudProcessor->FilterCloud(inputCloud, 0.3, Eigen::Vector4f(-10, -5, -3,20), Eigen::Vector4f(30,6,30,1));
 
   //segment ground and objects
-  std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = pointCloudProcessor->mySegmentPlane(filterCloud, 100, 0.2);
+  std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = pointCloudProcessor->customSegmentPlane(filterCloud, 100, 0.2);
   renderPointCloud(viewer,segmentCloud.first,"obstCloud",Color(1,0,0));
   renderPointCloud(viewer,segmentCloud.second,"planeCloud",Color(0,1,0));
 
   // Cluster the objects.
-  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointCloudProcessor->myClustering(segmentCloud.first, 0.35, 10, 300);
+  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointCloudProcessor->customClustering(segmentCloud.first, 0.35, 10, 300);
 
   // color the objects with bounding boxes
   int clusterIdentifier = 0;
