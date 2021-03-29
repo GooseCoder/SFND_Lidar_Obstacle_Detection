@@ -68,18 +68,18 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 template<typename PointT>
 std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) 
 {
-    typename pcl::PointCloud<PointT>::Ptr obstCloud (new pcl::PointCloud<PointT>());
-    typename pcl::PointCloud<PointT>::Ptr planeCloud (new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr obstacleCloud (new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr planesCloud (new pcl::PointCloud<PointT>());
     pcl::ExtractIndices<PointT> extract;
     extract.setInputCloud(cloud);
     extract.setIndices(inliers);
     extract.setNegative(false);
-    extract.filter(*planeCloud);
+    extract.filter(*planesCloud);
 
     extract.setNegative(true);
-    extract.filter(*obstCloud);
+    extract.filter(*obstacleCloud);
 
-    std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult(obstCloud, planeCloud);
+    std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult(obstacleCloud, planesCloud);
     return segResult;
 }
 
@@ -87,7 +87,7 @@ template<typename PointT>
 std::unordered_set<int> ProcessPointClouds<PointT>::myRansac(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol)
 {
     std::unordered_set<int> inliers;
-    std::unordered_set<int> inliersResult;
+    std::unordered_set<int> inliersSet;
     srand(time(NULL));
 
     int numCloud = cloud->points.size();
@@ -122,11 +122,11 @@ std::unordered_set<int> ProcessPointClouds<PointT>::myRansac(typename pcl::Point
             }
         }
 
-        if (inliers.size() > inliersResult.size()) {
-            inliersResult = inliers;
+        if (inliers.size() > inliersSet.size()) {
+            inliersSet = inliers;
         }
     }
-    return inliersResult;
+    return inliersSet;
 }
 
 
@@ -138,16 +138,16 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices());
 
-    std::unordered_set<int> inliersResult;
-    inliersResult = myRansac(cloud, maxIterations, distanceThreshold);
+    std::unordered_set<int> inliersList;
+    inliersList = myRansac(cloud, maxIterations, distanceThreshold);
 
-    for(int ind: inliersResult) {
+    for(int ind: inliersList) {
         inliers->indices.push_back(ind);  
     }
     
     if (inliers->indices.size () == 0)
     {
-      std::cout << "Could not estimate a planar model for the given dataset." << std::endl;
+      std::cout << "Is not possible to estimate a model for the dataset given as example" << std::endl;
     }
 
     auto endTime = std::chrono::steady_clock::now();
